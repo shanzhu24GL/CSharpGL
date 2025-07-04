@@ -1,10 +1,8 @@
-﻿namespace CSharpGL
-{
+﻿namespace CSharpGL {
     /// <summary>
     /// Manipulate camera or model.
     /// </summary>
-    public abstract class Manipulater
-    {
+    public abstract class Manipulater {
         /// <summary>
         /// start to manipulate specified <paramref name="camera"/> or model.
         /// </summary>

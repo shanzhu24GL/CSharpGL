@@ -1,12 +1,10 @@
-﻿using System.Windows.Forms;
+﻿//using System.Windows.Forms;
 
-namespace CSharpGL
-{
+namespace CSharpGL {
     /// <summary>
     /// Handle keyboard events.
     /// </summary>
-    public interface IKeyboardHandler
-    {
+    public interface IKeyboardHandler {
         /// <summary>
         ///
         /// </summary>

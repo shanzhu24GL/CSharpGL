@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 
-namespace CSharpGL
-{
+namespace CSharpGL {
     /// <summary>
     /// Rotate model using arc-ball method.
     /// </summary>
-    public class ArcBallManipulater : Manipulater, IMouseHandler
-    {
+    public class ArcBallManipulater : Manipulater, IMouseHandler {
         private int _height;
         private float _length, _radiusRadius;
         private vec3 _startPosition, _endPosition, _normalVector = new vec3(0, 1, 0);
@@ -31,8 +29,7 @@ namespace CSharpGL
         /// <summary>
         /// Indicates whether this this manipulater is binded to camera and canvas.
         /// </summary>
-        public bool IsBinded
-        {
+        public bool IsBinded {
             get { return isBinded; }
         }
 
@@ -57,8 +54,7 @@ namespace CSharpGL
         /// Rotate model using arc-ball method.
         /// </summary>
         /// <param name="bindingMouseButtons"></param>
-        public ArcBallManipulater(GLMouseButtons bindingMouseButtons = GLMouseButtons.Left)
-        {
+        public ArcBallManipulater(GLMouseButtons bindingMouseButtons = GLMouseButtons.Left) {
             this.MouseSensitivity = 6.0f;
             this.BindingMouseButtons = bindingMouseButtons;
 
@@ -82,8 +78,7 @@ namespace CSharpGL
         /// </summary>
         /// <param name="camera"></param>
         /// <param name="canvas"></param>
-        public override void Bind(ICamera camera, IGLCanvas canvas)
-        {
+        public override void Bind(ICamera camera, IGLCanvas canvas) {
             if (camera == null || canvas == null) { throw new ArgumentNullException(); }
 
             if (this.isBinded) { return; }
@@ -91,10 +86,10 @@ namespace CSharpGL
             this.camera = camera;
             this.canvas = canvas;
 
-            canvas.MouseDown += this.mouseDownEvent;
-            canvas.MouseMove += this.mouseMoveEvent;
-            canvas.MouseUp += this.mouseUpEvent;
-            canvas.MouseWheel += this.mouseWheelEvent;
+            canvas.GLMouseDown += this.mouseDownEvent;
+            canvas.GLMouseMove += this.mouseMoveEvent;
+            canvas.GLMouseUp += this.mouseUpEvent;
+            canvas.GLMouseWheel += this.mouseWheelEvent;
 
             //SetCamera(camera.Position, camera.Target, camera.UpVector);
 
@@ -102,16 +97,13 @@ namespace CSharpGL
         }
 
 
-        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e) {
             this.lastBindingMouseButtons = this.BindingMouseButtons;
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
                 IGLCanvas canvas = this.canvas;
                 this.SetBounds(this.canvas.Width, this.canvas.Height);
 
-                if (!cameraState.IsSameState(this.camera))
-                {
+                if (!cameraState.IsSameState(this.camera)) {
                     SetCamera(this.camera.Position, this.camera.Target, this.camera.UpVector);
                 }
 
@@ -121,20 +113,16 @@ namespace CSharpGL
 
                 {
                     var mouseDown = this.MouseDown;
-                    if (mouseDown != null)
-                    {
+                    if (mouseDown != null) {
                         mouseDown(this, e);
                     }
                 }
             }
         }
 
-        void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e)
-        {
-            if (mouseDownFlag && ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None))
-            {
-                if (!cameraState.IsSameState(this.camera))
-                {
+        void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e) {
+            if (mouseDownFlag && ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)) {
+                if (!cameraState.IsSameState(this.camera)) {
                     SetCamera(this.camera.Position, this.camera.Target, this.camera.UpVector);
                 }
 
@@ -146,8 +134,7 @@ namespace CSharpGL
                 _normalVector = _startPosition.cross(_endPosition).normalize();
                 if (!
                     ((_normalVector.x == 0 && _normalVector.y == 0 && _normalVector.z == 0)
-                    || float.IsNaN(_normalVector.x) || float.IsNaN(_normalVector.y) || float.IsNaN(_normalVector.z)))
-                {
+                    || float.IsNaN(_normalVector.x) || float.IsNaN(_normalVector.y) || float.IsNaN(_normalVector.z))) {
                     _startPosition = _endPosition;
 
                     mat4 newRotation = glm.rotate(angle, _normalVector);
@@ -156,8 +143,7 @@ namespace CSharpGL
 
                     {
                         var rotated = this.Rotated;
-                        if (rotated != null)
-                        {
+                        if (rotated != null) {
                             Quaternion quaternion = this.totalRotation.ToQuaternion();
                             float angleInDegree;
                             vec3 axis;
@@ -168,44 +154,37 @@ namespace CSharpGL
                 }
 
                 IGLCanvas canvas = this.canvas;
-                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual)
-                {
+                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual) {
                     canvas.Repaint();
                 }
             }
         }
 
-        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e)
-        {
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
+        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e) {
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
                 mouseDownFlag = false;
 
                 {
                     var mouseUp = this.MouseUp;
-                    if (mouseUp != null)
-                    {
+                    if (mouseUp != null) {
                         mouseUp(this, e);
                     }
                 }
             }
         }
 
-        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e) {
         }
 
         /// <summary>
         /// Unbind this manipulater to camera and canvas.
         /// </summary>
-        public override void Unbind()
-        {
-            if (this.canvas != null && (!this.canvas.IsDisposed))
-            {
-                this.canvas.MouseDown -= this.mouseDownEvent;
-                this.canvas.MouseMove -= this.mouseMoveEvent;
-                this.canvas.MouseUp -= this.mouseUpEvent;
-                this.canvas.MouseWheel -= this.mouseWheelEvent;
+        public override void Unbind() {
+            if (this.canvas != null && (!this.canvas.IsDisposed)) {
+                this.canvas.GLMouseDown -= this.mouseDownEvent;
+                this.canvas.GLMouseMove -= this.mouseMoveEvent;
+                this.canvas.GLMouseUp -= this.mouseUpEvent;
+                this.canvas.GLMouseWheel -= this.mouseWheelEvent;
                 this.canvas = null;
                 this.camera = null;
 
@@ -213,8 +192,7 @@ namespace CSharpGL
             }
         }
 
-        private vec3 GetArcBallPosition(int x, int y)
-        {
+        private vec3 GetArcBallPosition(int x, int y) {
             float rx = (x - _width / 2.0f) / _length;
             float ry = (_height / 2.0f - y) / _length;
             float zz = _radiusRadius - rx * rx - ry * ry;
@@ -231,8 +209,7 @@ namespace CSharpGL
             return result;
         }
 
-        private void SetBounds(int width, int height)
-        {
+        private void SetBounds(int width, int height) {
             this._width = width; this._height = height;
             _length = width > height ? width : height;
             var rx = ((float)(width) / 2) / _length;
@@ -240,8 +217,7 @@ namespace CSharpGL
             _radiusRadius = (float)(rx * rx + ry * ry);
         }
 
-        private void SetCamera(vec3 position, vec3 target, vec3 up)
-        {
+        private void SetCamera(vec3 position, vec3 target, vec3 up) {
             _vectorBack = (position - target).normalize();
             _vectorRight = up.cross(_vectorBack).normalize();
             _vectorUp = _vectorBack.cross(_vectorRight).normalize();
@@ -254,8 +230,7 @@ namespace CSharpGL
         /// <summary>
         ///
         /// </summary>
-        public mat4 GetRotationMatrix()
-        {
+        public mat4 GetRotationMatrix() {
             return this.totalRotation;
         }
 
@@ -263,19 +238,16 @@ namespace CSharpGL
         /// 
         /// </summary>
         /// <param name="totalRotation"></param>
-        public void SetRotationMatrix(mat4 totalRotation)
-        {
+        public void SetRotationMatrix(mat4 totalRotation) {
             this.totalRotation = totalRotation;
         }
 
-        private class CameraState
-        {
+        private class CameraState {
             public vec3 position;
             public vec3 target;
             public vec3 up;
 
-            public bool IsSameState(ICamera camera)
-            {
+            public bool IsSameState(ICamera camera) {
                 if (camera.Position != this.position) { return false; }
                 if (camera.Target != this.target) { return false; }
                 if (camera.UpVector != this.up) { return false; }
@@ -287,8 +259,7 @@ namespace CSharpGL
         /// <summary>
         /// 
         /// </summary>
-        public class Rotation : GLMouseEventArgs
-        {
+        public class Rotation : GLMouseEventArgs {
             /// <summary>
             /// 
             /// </summary>
@@ -309,8 +280,7 @@ namespace CSharpGL
             /// <param name="y">鼠标单击的 y 坐标（以像素为单位，以bottom为0）。相对<see cref="CtrlRoot"/>而言。</param>
             /// <param name="delta">鼠标轮已转动的制动器数的有符号计数。</param>
             public Rotation(vec3 axis, float angleInDegree, GLMouseButtons button, int clicks, int x, int y, int delta)
-                : base(button, clicks, x, y, delta)
-            {
+                : base(button, clicks, x, y, delta) {
                 this.axis = axis;
                 this.angleInDegree = angleInDegree;
             }
@@ -319,8 +289,7 @@ namespace CSharpGL
             /// 
             /// </summary>
             /// <returns></returns>
-            public override string ToString()
-            {
+            public override string ToString() {
                 return string.Format("axis:{0}, angle:{1}°", this.axis, this.angleInDegree);
             }
         }

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Drawing;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 
-namespace CSharpGL
-{
+namespace CSharpGL {
     /// <summary>
     /// Rotate model using arc-ball method.
     /// </summary>
-    public class TranslateManipulater : Manipulater, IMouseHandler
-    {
+    public class TranslateManipulater : Manipulater, IMouseHandler {
         private int _width;
         private int _height;
         private Point _lastPosition;
@@ -31,8 +29,7 @@ namespace CSharpGL
         /// <summary>
         /// 
         /// </summary>
-        public bool IsBinded
-        {
+        public bool IsBinded {
             get { return isBinded; }
         }
 
@@ -41,8 +38,7 @@ namespace CSharpGL
         /// </summary>
         /// <param name="renderer"></param>
         /// <param name="bindingMouseButtons"></param>
-        public TranslateManipulater(SceneNodeBase renderer, GLMouseButtons bindingMouseButtons = GLMouseButtons.Left)
-        {
+        public TranslateManipulater(SceneNodeBase renderer, GLMouseButtons bindingMouseButtons = GLMouseButtons.Left) {
             this.renderer = renderer;
             this.MouseSensitivity = 6.0f;
             this.BindingMouseButtons = bindingMouseButtons;
@@ -68,8 +64,7 @@ namespace CSharpGL
         /// </summary>
         /// <param name="camera"></param>
         /// <param name="canvas"></param>
-        public override void Bind(ICamera camera, IGLCanvas canvas)
-        {
+        public override void Bind(ICamera camera, IGLCanvas canvas) {
             if (camera == null || canvas == null) { throw new ArgumentNullException(); }
 
             if (this.isBinded) { return; }
@@ -77,26 +72,23 @@ namespace CSharpGL
             this.camera = camera;
             this.canvas = canvas;
 
-            canvas.MouseDown += this.mouseDownEvent;
-            canvas.MouseMove += this.mouseMoveEvent;
-            canvas.MouseUp += this.mouseUpEvent;
-            canvas.MouseWheel += this.mouseWheelEvent;
+            canvas.GLMouseDown += this.mouseDownEvent;
+            canvas.GLMouseMove += this.mouseMoveEvent;
+            canvas.GLMouseUp += this.mouseUpEvent;
+            canvas.GLMouseWheel += this.mouseWheelEvent;
 
             SetCamera(camera.Position, camera.Target, camera.UpVector);
 
             this.isBinded = true;
         }
 
-        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e) {
             this.lastBindingMouseButtons = this.BindingMouseButtons;
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
-                var control = sender as Control;
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
+                var control = sender as IGLCanvas/*Control*/;
                 this.SetBounds(control.Width, control.Height);
 
-                if (!cameraState.IsSameState(this.camera))
-                {
+                if (!cameraState.IsSameState(this.camera)) {
                     SetCamera(this.camera.Position, this.camera.Target, this.camera.UpVector);
                 }
 
@@ -106,12 +98,9 @@ namespace CSharpGL
             }
         }
 
-        void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e)
-        {
-            if (mouseDownFlag && ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None))
-            {
-                if (!cameraState.IsSameState(this.camera))
-                {
+        unsafe void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e) {
+            if (mouseDownFlag && ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)) {
+                if (!cameraState.IsSameState(this.camera)) {
                     SetCamera(this.camera.Position, this.camera.Target, this.camera.UpVector);
                 }
 
@@ -122,8 +111,10 @@ namespace CSharpGL
                 mat4 projection = this.camera.GetProjectionMatrix();
                 vec4 viewport;
                 {
-                    var result = new int[4];
-                    GL.Instance.GetIntegerv((uint)GetTarget.Viewport, result);
+                    var result = stackalloc int[4];
+                    var gl = GL.current; if (gl != null) {
+                        gl.glGetIntegerv((GLenum)GetTarget.Viewport, result);
+                    }
                     viewport = new vec4(result[0], result[1], result[2], result[3]);
                 }
                 var position = new vec3(0.0f);// imangine we have a point at (0, 0, 0).
@@ -137,36 +128,30 @@ namespace CSharpGL
                 this._lastPosition = location;
 
                 IGLCanvas canvas = this.canvas;
-                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual)
-                {
+                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual) {
                     canvas.Repaint();
                 }
             }
         }
 
-        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e)
-        {
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
+        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e) {
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
                 mouseDownFlag = false;
             }
         }
 
-        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e) {
         }
 
         /// <summary>
         ///
         /// </summary>
-        public override void Unbind()
-        {
-            if (this.canvas != null && (!this.canvas.IsDisposed))
-            {
-                this.canvas.MouseDown -= this.mouseDownEvent;
-                this.canvas.MouseMove -= this.mouseMoveEvent;
-                this.canvas.MouseUp -= this.mouseUpEvent;
-                this.canvas.MouseWheel -= this.mouseWheelEvent;
+        public override void Unbind() {
+            if (this.canvas != null && (!this.canvas.IsDisposed)) {
+                this.canvas.GLMouseDown -= this.mouseDownEvent;
+                this.canvas.GLMouseMove -= this.mouseMoveEvent;
+                this.canvas.GLMouseUp -= this.mouseUpEvent;
+                this.canvas.GLMouseWheel -= this.mouseWheelEvent;
                 this.canvas = null;
                 this.camera = null;
 
@@ -174,13 +159,11 @@ namespace CSharpGL
             }
         }
 
-        private void SetBounds(int width, int height)
-        {
+        private void SetBounds(int width, int height) {
             this._width = width; this._height = height;
         }
 
-        private void SetCamera(vec3 position, vec3 target, vec3 up)
-        {
+        private void SetCamera(vec3 position, vec3 target, vec3 up) {
             _vectorBack = (position - target).normalize();
             _vectorRight = up.cross(_vectorBack).normalize();
             _vectorUp = _vectorBack.cross(_vectorRight).normalize();
@@ -190,14 +173,12 @@ namespace CSharpGL
             this.cameraState.up = up;
         }
 
-        private class CameraState
-        {
+        private class CameraState {
             public vec3 position;
             public vec3 target;
             public vec3 up;
 
-            public bool IsSameState(ICamera camera)
-            {
+            public bool IsSameState(ICamera camera) {
                 if (camera.Position != this.position) { return false; }
                 if (camera.Target != this.target) { return false; }
                 if (camera.UpVector != this.up) { return false; }

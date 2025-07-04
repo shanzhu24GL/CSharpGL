@@ -1,12 +1,10 @@
-﻿using System.Windows.Forms;
+﻿//using System.Windows.Forms;
 
-namespace CSharpGL
-{
+namespace CSharpGL {
     /// <summary>
     /// Handle mouse events.
     /// </summary>
-    public interface IMouseHandler
-    {
+    public interface IMouseHandler {
         /// <summary>
         ///
         /// </summary>

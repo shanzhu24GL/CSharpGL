@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Drawing;
 
-using System.Windows.Forms;
+//using System.Windows.Forms;
 
-namespace CSharpGL
-{
+namespace CSharpGL {
     /// <summary>
     /// Rotates a camera on a sphere, whose center is camera's Target.
     /// <para>Just like a satellite moves around a fixed star.</para>
     /// </summary>
-    public class SatelliteManipulater : Manipulater, IMouseHandler
-    {
+    public class SatelliteManipulater : Manipulater, IMouseHandler {
         private vec3 back;
         private GUISize bound = new GUISize();
         private ICamera camera;
@@ -29,8 +27,7 @@ namespace CSharpGL
         /// <summary>
         ///
         /// </summary>
-        public SatelliteManipulater(GLMouseButtons bindingMouseButtons = GLMouseButtons.Right)
-        {
+        public SatelliteManipulater(GLMouseButtons bindingMouseButtons = GLMouseButtons.Right) {
             this.HorizontalRotationFactor = 4;
             this.VerticalRotationFactor = 4;
             this.BindingMouseButtons = bindingMouseButtons;
@@ -58,38 +55,33 @@ namespace CSharpGL
         /// <summary>
         ///
         /// </summary>
-        public override void Bind(ICamera camera, IGLCanvas canvas)
-        {
+        public override void Bind(ICamera camera, IGLCanvas canvas) {
             if (camera == null || canvas == null) { throw new ArgumentNullException(); }
 
             this.camera = camera;
             this.canvas = canvas;
 
-            canvas.MouseDown += this.mouseDownEvent;
-            canvas.MouseMove += this.mouseMoveEvent;
-            canvas.MouseUp += this.mouseUpEvent;
-            canvas.MouseWheel += this.mouseWheelEvent;
+            canvas.GLMouseDown += this.mouseDownEvent;
+            canvas.GLMouseMove += this.mouseMoveEvent;
+            canvas.GLMouseUp += this.mouseUpEvent;
+            canvas.GLMouseWheel += this.mouseWheelEvent;
         }
 
-        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseDown(object sender, GLMouseEventArgs e) {
             this.lastBindingMouseButtons = this.BindingMouseButtons;
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
                 this.lastPosition = e.Location;
-                var control = sender as Control;
+                var control = sender as IGLCanvas/*Control*/;
                 this.SetBounds(control.Width, control.Height);
                 this.mouseDownFlag = true;
                 PrepareCamera();
             }
         }
 
-        void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseMove(object sender, GLMouseEventArgs e) {
             if (this.mouseDownFlag
                 && ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-                && (e.X != lastPosition.x || e.Y != lastPosition.y))
-            {
+                && (e.X != lastPosition.x || e.Y != lastPosition.y)) {
                 IViewCamera camera = this.camera;
                 if (camera == null) { return; }
 
@@ -134,23 +126,19 @@ namespace CSharpGL
                 this.lastPosition = e.Location;
 
                 IGLCanvas canvas = this.canvas;
-                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual)
-                {
+                if (canvas != null && canvas.RenderTrigger == RenderTrigger.Manual) {
                     canvas.Repaint();
                 }
             }
         }
 
-        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e)
-        {
-            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None)
-            {
+        void IMouseHandler.canvas_MouseUp(object sender, GLMouseEventArgs e) {
+            if ((e.Button & this.lastBindingMouseButtons) != GLMouseButtons.None) {
                 this.mouseDownFlag = false;
             }
         }
 
-        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e)
-        {
+        void IMouseHandler.canvas_MouseWheel(object sender, GLMouseEventArgs e) {
             this.camera.MouseWheel(e.Delta);
         }
 
@@ -158,8 +146,7 @@ namespace CSharpGL
         ///
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("back:{0}|{3:0.00},up:{1}|{4:0.00},right:{2}|{5:0.00}",
                 back, up, right, back.length(), up.length(), right.length());
         }
@@ -167,24 +154,20 @@ namespace CSharpGL
         /// <summary>
         ///
         /// </summary>
-        public override void Unbind()
-        {
-            if (this.canvas != null && (!this.canvas.IsDisposed))
-            {
-                this.canvas.MouseDown -= this.mouseDownEvent;
-                this.canvas.MouseMove -= this.mouseMoveEvent;
-                this.canvas.MouseUp -= this.mouseUpEvent;
-                this.canvas.MouseWheel -= this.mouseWheelEvent;
+        public override void Unbind() {
+            if (this.canvas != null && (!this.canvas.IsDisposed)) {
+                this.canvas.GLMouseDown -= this.mouseDownEvent;
+                this.canvas.GLMouseMove -= this.mouseMoveEvent;
+                this.canvas.GLMouseUp -= this.mouseUpEvent;
+                this.canvas.GLMouseWheel -= this.mouseWheelEvent;
                 this.canvas = null;
                 this.camera = null;
             }
         }
 
-        private void PrepareCamera()
-        {
+        private void PrepareCamera() {
             var camera = this.camera;
-            if (camera != null)
-            {
+            if (camera != null) {
                 vec3 back = camera.Position - camera.Target;
                 vec3 right = camera.UpVector.cross(back);
                 vec3 up = back.cross(right);
@@ -195,8 +178,7 @@ namespace CSharpGL
             }
         }
 
-        private void SetBounds(int width, int height)
-        {
+        private void SetBounds(int width, int height) {
             this.bound.Width = width;
             this.bound.Height = height;
         }
