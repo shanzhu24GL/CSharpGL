@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using CSharpGL;
 
-namespace IObjFormatConsole
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
+namespace IObjFormatConsole {
+    class Program {
+        static void Main(string[] args) {
             {
                 Console.WriteLine("sphere");
                 var sphere = new Sphere(1, 40, 80);
@@ -17,12 +14,10 @@ namespace IObjFormatConsole
                 sphere.DumpObjFile(filename, "sphere");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "sphere");
@@ -35,12 +30,10 @@ namespace IObjFormatConsole
                 prismoid.DumpObjFile(filename, "prismoid");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "prismoid");
@@ -53,12 +46,10 @@ namespace IObjFormatConsole
                 cylinder.DumpObjFile(filename, "cylinder");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "cylinder");
@@ -72,12 +63,10 @@ namespace IObjFormatConsole
                 annulus.DumpObjFile(filename, "annulus");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "annulus");
@@ -91,12 +80,10 @@ namespace IObjFormatConsole
                 disk.DumpObjFile(filename, "disk");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "disk");
@@ -108,16 +95,13 @@ namespace IObjFormatConsole
                 uint nextIndex = 0;
                 var positionList = new List<vec3>();
                 var indexList = new List<uint>();
-                foreach (var item in list)
-                {
+                foreach (var item in list) {
                     vec3[] positions = item.model.GetPositions();
                     uint[] indexes = item.model.GetIndexes();
-                    for (int i = 0; i < positions.Length; i++)
-                    {
+                    for (int i = 0; i < positions.Length; i++) {
                         positionList.Add(positions[i] + item.position);
                     }
-                    for (int i = 0; i < indexes.Length; i++)
-                    {
+                    for (int i = 0; i < indexes.Length; i++) {
                         indexList.Add(indexes[i] + nextIndex);
                     }
 
@@ -128,12 +112,10 @@ namespace IObjFormatConsole
                 hanoiTower.DumpObjFile(filename, "hanoiTower");
                 var parser = new ObjVNFParser(false);
                 ObjVNFResult result = parser.Parse(filename);
-                if (result.Error != null)
-                {
+                if (result.Error != null) {
                     Console.WriteLine("Error: {0}", result.Error);
                 }
-                else
-                {
+                else {
                     ObjVNFMesh mesh = result.Mesh;
                     var model = new ObjVNF(mesh);
                     model.DumpObjFile("vnf" + filename, "hanoiTower");
@@ -142,27 +124,27 @@ namespace IObjFormatConsole
             Console.WriteLine("done");
         }
 
-        class TmpModel : IObjFormat
-        {
+        class TmpModel : IObjFormat {
             private vec3[] positions;
             private uint[] indexes;
 
-            public TmpModel(vec3[] positions, uint[] indexes)
-            {
+            public TmpModel(vec3[] positions, uint[] indexes) {
                 this.positions = positions;
                 this.indexes = indexes;
             }
 
             #region IObjFormat 成员
 
-            public vec3[] GetPositions()
-            {
+            public vec3[] GetPositions() {
                 return this.positions;
             }
 
-            public uint[] GetIndexes()
-            {
+            public uint[] GetIndexes() {
                 return this.indexes;
+            }
+
+            public vec2[] GetTexCoords() {
+                throw new NotImplementedException();
             }
 
             #endregion
